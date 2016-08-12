@@ -23,8 +23,8 @@ void Lamp::render(Camera *c)
 	model = glm::translate(model, offset);
 	model = glm::scale(model, glm::vec3(0.2f));
 	lightPos =  model * lightPos;
+	projection = glm::perspective(c->Zoom, (float)800.0 / (float)400.0, 0.1f, 100.0f);
 	view = c->GetViewMatrix();
-	projection = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
 	glUniformMatrix4fv(glGetUniformLocation(m_program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 	glUniformMatrix4fv(glGetUniformLocation(m_program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(glGetUniformLocation(m_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
