@@ -29,11 +29,8 @@ void Lamp::render(Camera *c)
 	glUniformMatrix4fv(glGetUniformLocation(m_program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(glGetUniformLocation(m_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-	glUniform3f(glGetUniformLocation(m_program, "objectColor"), 1.0f, 0.5f, 0.31f);
-	glUniform3f(glGetUniformLocation(m_program, "lightColor"), 1.0f, 1.0f, 1.0f); // Also set light's color (white)
-
 	glBindVertexArray(m_VAO);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 	glUseProgram(0);
 }

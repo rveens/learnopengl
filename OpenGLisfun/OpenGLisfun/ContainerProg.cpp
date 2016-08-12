@@ -25,19 +25,54 @@ void ContainerProg::render(Camera *c, Lamp *p)
 	glUniformMatrix4fv(glGetUniformLocation(m_program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(glGetUniformLocation(m_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-	glUniform3f(glGetUniformLocation(m_program, "objectColor"), 1.0f, 0.5f, 0.31f);
-	glUniform3f(glGetUniformLocation(m_program, "lightColor"), 1.0f, 1.0f, 1.0f); // Also set light's color (white)
-	glm::vec4 lightPosView = view * model * p->lightPos;
-	glUniform3f(glGetUniformLocation(m_program, "lightPos"), lightPosView.x, lightPosView.y, lightPosView.z);
-	glUniform3f(glGetUniformLocation(m_program, "viewPos"), c->Position.x, c->Position.y, c->Position.z);
+	/*glUniform3f(glGetUniformLocation(m_program, "material.ambient"), 0.0215f, 0.1745f, 0.0215f);
+	glUniform3f(glGetUniformLocation(m_program, "material.diffuse"), 0.07568f, 0.61424f, 0.07568f);
+	glUniform3f(glGetUniformLocation(m_program, "material.specular"), 0.633f, 0.727811f, 0.633f);*/
+	glUniform1f(glGetUniformLocation(m_program, "material.shininess"), 32.0f);
 
+	glUniform3f(glGetUniformLocation(m_program, "dir.ambient"),	0.1f, 0.1f, 0.1f);
+	glUniform3f(glGetUniformLocation(m_program, "dir.diffuse"),	1.0f, 1.0f, 1.0f); // Let's darken the light a bit to fit the scene
+	glUniform3f(glGetUniformLocation(m_program, "dir.specular"),	1.0f, 1.0f, 1.0f);
+
+	glUniform3f(glGetUniformLocation(m_program, "point.ambient"), 0.1f, 0.1f, 0.1f);
+	glUniform3f(glGetUniformLocation(m_program, "point.diffuse"), 0.8f, 0.8, 0.8);
+	glUniform3f(glGetUniformLocation(m_program, "point.specular"), 0.7f, 0.7f, 0.7f);
+	
+	// light object
+	glUniform3f(glGetUniformLocation(m_program, "LightPosition"), p->lightPos.x, p->lightPos.y, p->lightPos.z);
+	glUniform1f(glGetUniformLocation(m_program, "point.constant"), 1.0f);
+	glUniform1f(glGetUniformLocation(m_program, "point.linear"), 0.09);
+	glUniform1f(glGetUniformLocation(m_program, "point.quadratic"), 0.032);
+
+	// light directional
+	//glUniform3f(glGetUniformLocation(m_program, "dir.direction"), 0.0f, 1.0f, 0.0f);
+	
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, texture2);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, texture3);
+	
 	glBindVertexArray(m_VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		for (GLuint i = 0; i < 10; i++)
+		{
+			model = glm::mat4();
+			model = glm::translate(model, cubePositions[i]);
+			GLfloat angle = 20.0f * i;
+			model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
+			glUniformMatrix4fv(glGetUniformLocation(m_program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 	glBindVertexArray(0);
 	glUseProgram(0);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
@@ -48,13 +83,32 @@ void ContainerProg::setupShaders()
 	shaders[1] = shader::load("..\\OpenGLisfun\\container.frag", GL_FRAGMENT_SHADER);
 	m_program = program::link_from_shaders(shaders, 2, true);
 
-	int width, height;
-	unsigned char *image = SOIL_load_image("..\\OpenGLisfun\\capture.png", &width, &height, 0, SOIL_LOAD_RGB);
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	SOIL_free_image_data(image);
+	glUseProgram(m_program);
+		int width, height;
+		unsigned char *image = SOIL_load_image("..\\OpenGLisfun\\container2.png", &width, &height, 0, SOIL_LOAD_RGB);
+		glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+		glUniform1i(glGetUniformLocation(m_program, "material.diffuse"), 0);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		SOIL_free_image_data(image);
+
+		image = SOIL_load_image("..\\OpenGLisfun\\container2_specular.png", &width, &height, 0, SOIL_LOAD_RGB);
+		glGenTextures(1, &texture2);
+		glBindTexture(GL_TEXTURE_2D, texture2);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+		glUniform1i(glGetUniformLocation(m_program, "material.specular"), 1);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		SOIL_free_image_data(image);
+
+		image = SOIL_load_image("..\\OpenGLisfun\\matrix.jpg", &width, &height, 0, SOIL_LOAD_RGB);
+		glGenTextures(1, &texture3);
+		glBindTexture(GL_TEXTURE_2D, texture3);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+		glUniform1i(glGetUniformLocation(m_program, "material.emission"), 2);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		SOIL_free_image_data(image);
+	glUseProgram(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 

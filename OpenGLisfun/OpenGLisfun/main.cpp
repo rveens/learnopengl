@@ -5,6 +5,8 @@
 #include <GLFW/glfw3.h>
 // SOIL
 #include <SOIL.h>
+// assimp
+#define ASSIMP_BUILD_STATIC_LIB
 // std
 #include <iostream>
 // this project
@@ -13,6 +15,10 @@
 #include "ContainerProg.h"
 #include "Camera.h"
 #include "Lamp.h"
+#include "Model.h"
+#include "Shader.h"
+#include <glm\glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 // global variables
 static GLFWwindow *window;
@@ -37,7 +43,10 @@ int main(int argc, char *argv[])
 	c = new Camera();
 	//t = new OpenGLProg(width/height, c);
 	l = new Lamp(width / height);
+
 	cp = new ContainerProg(width / height);
+	Model *m = new Model("..\\OpenGLisfun\\nanosuit\\nanosuit.obj");
+	Shader shader("..\\OpenGLisfun\\loader.vert", "..\\OpenGLisfun\\loader.frag");
 	
 	glEnable(GL_DEPTH_TEST);
 
@@ -55,7 +64,36 @@ int main(int argc, char *argv[])
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//t->render();
 		l->render(c);
-		cp->render(c, l);
+		//cp->render(c, l);
+
+		shader.Use();
+		// Transformation matrices
+		glm::mat4 projection = glm::perspective(c->Zoom, (float)800.0 / (float)400.0, 0.1f, 100.0f);
+		glm::mat4 view = c->GetViewMatrix();
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+
+		// Draw the loaded model
+		glm::mat4 model;
+		model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it down
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+
+		glUniform1f(glGetUniformLocation(shader.Program, "light.constant"), 1.0f);
+		glUniform1f(glGetUniformLocation(shader.Program, "light.linear"), 0.045);
+		glUniform1f(glGetUniformLocation(shader.Program, "light.quadratic"), 0.0075);
+
+		glUniform3f(glGetUniformLocation(shader.Program, "lightPos"), l->lightPos.x, l->lightPos.y, l->lightPos.z);
+		glUniform3f(glGetUniformLocation(shader.Program, "viewPos"), c->Position.x, c->Position.y, c->Position.z);
+
+		glUniform3f(glGetUniformLocation(shader.Program, "light.ambient"), 0.1f, 0.1f, 0.1f);
+		glUniform3f(glGetUniformLocation(shader.Program, "light.diffuse"), 0.8f, 0.8, 0.8);
+		glUniform3f(glGetUniformLocation(shader.Program, "light.specular"), 0.7f, 0.7f, 0.7f);
+
+		//glm::vec4 lightPos = l->lightPos;
+		//glUniform3f(glGetUniformLocation(shader.Program, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
+
+		m->Draw(shader);
 
 		// swap the front and back buffer
 		glfwSwapBuffers(window);
