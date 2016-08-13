@@ -3,15 +3,17 @@
 #include "Camera.h"
 #include <glm/glm.hpp>
 
-class Lamp
+#include "WorldObject.h"
+
+class Lamp : public WorldObject
 {
 public:
 	GLuint m_program;
 	glm::vec4 lightPos = glm::vec4(offset, 1.0);
 
-	Lamp(float aspectRatio);
+	Lamp(glm::mat4x4 &view, glm::mat4x4 &projection);
 	virtual ~Lamp();
-	void render(Camera *c);
+	void render();
 private:
 	glm::vec3 offset = glm::vec3(0.5f, 1.0f, 1.0f);
 

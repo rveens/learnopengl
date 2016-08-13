@@ -7,10 +7,13 @@ Model::~Model()
 {
 }
 
-void Model::Draw(Shader shader)
+void Model::Render()
 {
+	shader.Use();
+	setupUniforms();
 	for (GLuint i = 0; i < this->meshes.size(); i++)
-		this->meshes[i].Draw(shader);
+		this->meshes[i].Draw(shader.Program);
+	glUseProgram(0);
 }
 
 void Model::loadModel(std::string path)

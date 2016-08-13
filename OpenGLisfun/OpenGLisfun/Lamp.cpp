@@ -4,7 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <GLFW\glfw3.h>
 
-Lamp::Lamp(float aspectRatio) : aspectRatio(aspectRatio)
+Lamp::Lamp(glm::mat4x4 &view, glm::mat4x4 &projection) : WorldObject(view, projection)
 {
 	setupShaders();
 	setupVOA();
@@ -14,17 +14,15 @@ Lamp::~Lamp()
 {
 }
 
-void Lamp::render(Camera *c)
+void Lamp::render()
 {
 	glUseProgram(m_program);
-	glm::mat4x4 model, view, projection;
+	glm::mat4x4 model;
 	model = glm::mat4();
 	model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0, 1.0, 0.0));
 	model = glm::translate(model, offset);
 	model = glm::scale(model, glm::vec3(0.2f));
 	lightPos =  model * lightPos;
-	projection = glm::perspective(c->Zoom, (float)800.0 / (float)400.0, 0.1f, 100.0f);
-	view = c->GetViewMatrix();
 	glUniformMatrix4fv(glGetUniformLocation(m_program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 	glUniformMatrix4fv(glGetUniformLocation(m_program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(glGetUniformLocation(m_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));

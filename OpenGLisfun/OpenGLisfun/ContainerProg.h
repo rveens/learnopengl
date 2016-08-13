@@ -3,15 +3,16 @@
 #include "Camera.h"
 #include <glm/glm.hpp>
 #include "Lamp.h"
+#include "WorldObject.h"
 
-class ContainerProg
+class ContainerProg : public WorldObject
 {
 public:
 	GLuint m_program;
 
-	ContainerProg(float aspectRatio);
+	ContainerProg(glm::mat4x4 &view, glm::mat4x4 &projection);
 	virtual ~ContainerProg();
-	void render(Camera *c, Lamp *p);
+	void render(Lamp *p);
 private:
 	float aspectRatio;
 	GLuint m_VAO;

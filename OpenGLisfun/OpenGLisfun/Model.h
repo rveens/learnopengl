@@ -9,17 +9,21 @@
 
 #include "Mesh.h"
 #include "Shader.h"
+#include "WorldObject.h"
 
-class Model
+class Model : public WorldObject
 {
 public:
 	/* Functions */
-	Model(GLchar *path)
+	Model(GLchar *path, Shader shader, glm::mat4x4 &view, glm::mat4x4 &projection) : shader(shader), WorldObject(view, projection)
 	{
 		this->loadModel(path);
 	}
 	virtual ~Model();
-	void Draw(Shader shader);
+	void Render();
+	virtual void setupUniforms() = 0;
+protected:
+	Shader shader;
 private:
 	/* Model Data */
 	std::vector<Mesh> meshes;

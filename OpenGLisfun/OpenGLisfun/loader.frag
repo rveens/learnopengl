@@ -3,6 +3,7 @@
 in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoords;
+in vec3 LightPos;   // Extra in variable, since we need the light position in view space we calculate this in the vertex shader
 
 out vec4 color;
 uniform sampler2D texture_specular1;
@@ -19,8 +20,7 @@ struct Material {
   
 uniform Material material;
 
-uniform vec3 lightPos; 
-uniform vec3 viewPos;
+//uniform vec3 viewPos;
 
 struct Light {
 	//vec3 position;
@@ -42,7 +42,7 @@ uniform Light light;
 
 void main()
 {
-	vec3 lightDir = normalize(lightPos - FragPos);
+	vec3 lightDir = normalize(LightPos - FragPos);
 	vec3 norm = normalize(Normal);
 
 	// ambient
@@ -53,7 +53,7 @@ void main()
 	vec3 diffuse = vec3(texture(texture_diffuse1,TexCoords)) * diff * light.diffuse;
 
 	// specular
-	vec3 viewDir = normalize(viewPos - FragPos);
+	vec3 viewDir = normalize(- FragPos);
 	vec3 reflectDir = reflect(-lightDir, norm);
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 	vec3 specular = vec3(texture(texture_specular1,TexCoords)) * spec * light.specular;
