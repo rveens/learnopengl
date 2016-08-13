@@ -10,10 +10,11 @@ class ContainerProg : public WorldObject
 public:
 	GLuint m_program;
 
-	ContainerProg(glm::mat4x4 &view, glm::mat4x4 &projection);
+	ContainerProg(glm::mat4x4 &view, glm::mat4x4 &projection, Lamp *p);
 	virtual ~ContainerProg();
-	void render(Lamp *p);
+	void render();
 private:
+	Lamp *p;
 	float aspectRatio;
 	GLuint m_VAO;
 	GLuint m_VBO;

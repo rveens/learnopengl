@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 	//t = new OpenGLProg(width/height, c);
 	l = new Lamp(view, projection);
 
-	cp = new ContainerProg(view, projection);
+	cp = new ContainerProg(view, projection, l);
 	Shader shader("..\\OpenGLisfun\\loader.vert", "..\\OpenGLisfun\\loader.frag");
 	Model *m = new ModelWithLight("..\\OpenGLisfun\\nanosuit\\nanosuit.obj", shader, view, projection, l);
 	
@@ -64,11 +64,10 @@ int main(int argc, char *argv[])
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		projection = glm::perspective(c->Zoom, (float)800.0 / (float)400.0, 0.1f, 100.0f);
+		projection = glm::perspective(c->Zoom, (float) width/height, 0.1f, 100.0f);
 		view = c->GetViewMatrix();
-
 		l->render();
-		//cp->render(c, l);
+		//cp->render();
 		m->Render();
 
 		// swap the front and back buffer

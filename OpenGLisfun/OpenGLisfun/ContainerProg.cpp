@@ -4,7 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <GLFW\glfw3.h>
 
-ContainerProg::ContainerProg(glm::mat4x4 &view, glm::mat4x4 &projection) : WorldObject(view, projection)
+ContainerProg::ContainerProg(glm::mat4x4 &view, glm::mat4x4 &projection, Lamp *p) : p(p), WorldObject(view, projection)
 {
 	setupShaders();
 	setupVOA();
@@ -14,7 +14,7 @@ ContainerProg::~ContainerProg()
 {
 }
 
-void ContainerProg::render(Lamp *p)
+void ContainerProg::render()
 {
 	glUseProgram(m_program);
 	glm::mat4x4 model;
