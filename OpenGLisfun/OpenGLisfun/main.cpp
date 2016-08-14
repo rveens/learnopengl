@@ -68,7 +68,9 @@ int main(int argc, char *argv[])
 		view = c->GetViewMatrix();
 		l->render();
 		//cp->render();
+		glEnable(GL_CULL_FACE);
 		m->Render();
+		glDisable(GL_CULL_FACE);
 
 		// swap the front and back buffer
 		glfwSwapBuffers(window);

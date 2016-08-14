@@ -70,7 +70,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>B:\Code\learnopengl\Simple OpenGL Image Library\src;B:\Code\learnopengl\glew-2.0.0\include;B:\Code\learnopengl\glfw-3.2.bin.WIN32\include;../../glew-2.0.0/include;../../glfw-3.2.bin.WIN32/include;../../Simple OpenGL Image Library\src;../../glm/;../../assimp-3.2\include;$(IncludePath)</IncludePath>
-    <LibraryPath>B:\Code\learnopengl\Simple OpenGL Image Library\lib;B:\Code\learnopengl\glew-2.0.0\lib\Release\Win32;B:\Code\learnopengl\glfw-3.2.bin.WIN32\lib-vc2015;../../Simple OpenGL Image Library\lib;../../glfw-3.2.bin.WIN32\lib-vc2015;../../glew-2.0.0\lib\Release\Win32;B:\Dropbox\Hobby\learnopengl\assimp-3.2\build\code\Release;$(LibraryPath)</LibraryPath>
+    <LibraryPath>B:\Code\learnopengl\Simple OpenGL Image Library\lib;B:\Code\learnopengl\glew-2.0.0\lib\Release\Win32;B:\Code\learnopengl\glfw-3.2.bin.WIN32\lib-vc2015;../../Simple OpenGL Image Library\lib;../../glfw-3.2.bin.WIN32\lib-vc2015;../../glew-2.0.0\lib\Release\Win32;../../assimp-3.2\build\code\Release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
