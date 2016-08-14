@@ -4,11 +4,12 @@
 #include <glm/glm.hpp>
 
 #include "WorldObject.h"
+#include "Shader.h"
 
 class Lamp : public WorldObject
 {
 public:
-	GLuint m_program;
+	Shader shader = Shader("..\\OpenGLisfun\\container.vert", "..\\OpenGLisfun\\lamp.frag");
 	glm::vec4 lightPos = glm::vec4(offset, 1.0);
 
 	Lamp(glm::mat4x4 &view, glm::mat4x4 &projection);
@@ -64,8 +65,6 @@ private:
 		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
 		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 	};
-
-	void setupShaders();
 	void setupVOA();
 };
 

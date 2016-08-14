@@ -10,7 +10,6 @@
 // std
 #include <iostream>
 // this project
-#include "util.h"
 //#include "OpenGLProg.h"
 #include "ContainerProg.h"
 #include "Camera.h"
@@ -101,14 +100,14 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 
 	if (key == GLFW_KEY_LEFT && GLFW_PRESS) {
 		value -= 0.1f;
-		glUseProgram(cp->m_program);
-		glUniform1f(glGetUniformLocation(cp->m_program, "mixer"), value);
+		glUseProgram(cp->shader.Program);
+		glUniform1f(glGetUniformLocation(cp->shader.Program, "mixer"), value);
 		glUseProgram(0);
 	}
 	if (key == GLFW_KEY_RIGHT && GLFW_PRESS) {
 		value += 0.1f;
-		glUseProgram(cp->m_program);
-		glUniform1f(glGetUniformLocation(cp->m_program, "mixer"), value);
+		glUseProgram(cp->shader.Program);
+		glUniform1f(glGetUniformLocation(cp->shader.Program, "mixer"), value);
 		glUseProgram(0);
 	}
 }

@@ -1,5 +1,4 @@
 #include "Mesh.h"
-#include "util.h"
 
 #include <sstream>
 

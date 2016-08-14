@@ -1,12 +1,10 @@
 #include "Lamp.h"
 
-#include "util.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <GLFW\glfw3.h>
 
 Lamp::Lamp(glm::mat4x4 &view, glm::mat4x4 &projection) : WorldObject(view, projection)
 {
-	setupShaders();
 	setupVOA();
 }
 
@@ -16,29 +14,21 @@ Lamp::~Lamp()
 
 void Lamp::render()
 {
-	glUseProgram(m_program);
-	glm::mat4x4 model;
-	model = glm::mat4();
-	model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0, 1.0, 0.0));
-	model = glm::translate(model, offset);
-	model = glm::scale(model, glm::vec3(0.2f));
-	lightPos =  model * lightPos;
-	glUniformMatrix4fv(glGetUniformLocation(m_program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-	glUniformMatrix4fv(glGetUniformLocation(m_program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-	glUniformMatrix4fv(glGetUniformLocation(m_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+	shader.Use();
+		glm::mat4x4 model;
+		model = glm::mat4();
+		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0, 1.0, 0.0));
+		model = glm::translate(model, offset);
+		model = glm::scale(model, glm::vec3(0.2f));
+		lightPos =  model * lightPos;
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-	glBindVertexArray(m_VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-	glBindVertexArray(0);
+		glBindVertexArray(m_VAO);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
 	glUseProgram(0);
-}
-
-void Lamp::setupShaders()
-{
-	GLuint shaders[2];
-	shaders[0] = shader::load("..\\OpenGLisfun\\container.vert", GL_VERTEX_SHADER);
-	shaders[1] = shader::load("..\\OpenGLisfun\\lamp.frag", GL_FRAGMENT_SHADER);
-	m_program = program::link_from_shaders(shaders, 2, true);
 }
 
 void Lamp::setupVOA()

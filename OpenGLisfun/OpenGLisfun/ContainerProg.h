@@ -4,12 +4,12 @@
 #include <glm/glm.hpp>
 #include "Lamp.h"
 #include "WorldObject.h"
+#include "Shader.h"
 
 class ContainerProg : public WorldObject
 {
 public:
-	GLuint m_program;
-
+	Shader shader = Shader("..\\OpenGLisfun\\container.vert", "..\\OpenGLisfun\\container.frag");
 	ContainerProg(glm::mat4x4 &view, glm::mat4x4 &projection, Lamp *p);
 	virtual ~ContainerProg();
 	void render();
