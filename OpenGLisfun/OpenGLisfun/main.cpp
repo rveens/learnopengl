@@ -34,14 +34,15 @@ static GLfloat lastFrame = 0.0f;  	// Time of last frame
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode);
 bool createGLFWwindow();
 void do_movement();
+void setup_framebuffer();
 
 static bool keys[1024];
+static GLuint framebuffer, texturecolorbuffer;
 
 int main(int argc, char *argv[])
 {
 	createGLFWwindow();
 	c = new Camera();
-	//t = new OpenGLProg(width/height, c);
 	l = new Lamp(view, projection);
 
 	cp = new ContainerProg(view, projection, l);
@@ -49,6 +50,7 @@ int main(int argc, char *argv[])
 	Model *m = new ModelWithLight("..\\OpenGLisfun\\nanosuit\\nanosuit.obj", shader, view, projection, l);
 	
 	glEnable(GL_DEPTH_TEST);
+	setup_framebuffer();
 
 	while (!glfwWindowShouldClose(window)) {
 		GLfloat currentFrame = glfwGetTime();
@@ -60,16 +62,16 @@ int main(int argc, char *argv[])
 		do_movement();
 
 		// rendering
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(0.0f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		projection = glm::perspective(c->Zoom, (float) width/height, 0.1f, 100.0f);
+		projection = glm::perspective(c->Zoom, (float)width / height, 0.1f, 100.0f);
 		view = c->GetViewMatrix();
 		l->render();
-		//cp->render();
 		glEnable(GL_CULL_FACE);
 		m->Render();
 		glDisable(GL_CULL_FACE);
+		cp->render();
+
 
 		// swap the front and back buffer
 		glfwSwapBuffers(window);
@@ -79,9 +81,37 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
+void setup_framebuffer()
+{
+	glGenFramebuffers(1, &framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+	glGenTextures(1, &texturecolorbuffer);
+	glBindTexture(GL_TEXTURE_2D, texturecolorbuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texturecolorbuffer, 0);
+
+	GLuint rbo;
+	glGenRenderbuffers(1, &rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode)
 {
 	static bool toggle = true;
+	static bool toggle2 = true;
 	static float value = 0.2f;
 	if (action == GLFW_PRESS)
 		keys[key] = true;
@@ -109,6 +139,16 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 		glUseProgram(cp->shader.Program);
 		glUniform1f(glGetUniformLocation(cp->shader.Program, "mixer"), value);
 		glUseProgram(0);
+	}
+	if (key == GLFW_KEY_P && GLFW_PRESS) {
+		if (toggle2) {
+			glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+		}
+		else {
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			cp->setTexture(texturecolorbuffer);
+		}
+		toggle2 = !toggle2;
 	}
 }
 

@@ -21,6 +21,6 @@ void main()
     gl_Position = projection * view * model * vec4(position, 1.0f);
 	FragPos = vec3(view * model * vec4(position, 1.0f));
 	Normal = normal;
-	Texcoord = vec2(texcoord.x, 1.0f - texcoord.y);
+	Texcoord = vec2(texcoord.x, texcoord.y);
 	LightPos = vec3(view * vec4(LightPosition, 1.0));
 }

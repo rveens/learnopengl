@@ -13,6 +13,7 @@ public:
 	ContainerProg(glm::mat4x4 &view, glm::mat4x4 &projection, Lamp *p);
 	virtual ~ContainerProg();
 	void render();
+	void setTexture(GLuint textureHandle);
 private:
 	Lamp *p;
 	float aspectRatio;
