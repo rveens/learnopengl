@@ -36,6 +36,9 @@
     <ClCompile Include="ModelWithLight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BackCamera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="container.vert">
@@ -52,6 +55,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="loader.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="backcamera.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="backcamera.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
@@ -78,6 +87,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ModelWithLight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BackCamera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

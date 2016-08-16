@@ -122,6 +122,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BackCamera.cpp" />
     <ClCompile Include="ContainerProg.cpp" />
     <ClCompile Include="Lamp.cpp" />
     <ClCompile Include="main.cpp" />
@@ -130,6 +131,8 @@
     <ClCompile Include="ModelWithLight.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="backcamera.frag" />
+    <None Include="backcamera.vert" />
     <None Include="ClassDiagram.cd" />
     <None Include="container.frag" />
     <None Include="container.vert" />
@@ -138,6 +141,7 @@
     <None Include="loader.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BackCamera.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ContainerProg.h" />
     <ClInclude Include="Lamp.h" />
