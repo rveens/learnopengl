@@ -10,7 +10,6 @@
 // std
 #include <iostream>
 // this project
-//#include "OpenGLProg.h"
 #include "ContainerProg.h"
 #include "Camera.h"
 #include "Lamp.h"
@@ -18,6 +17,8 @@
 #include "Shader.h"
 #include "BackCamera.h"
 #include "ModelWithLight.h"
+#include "SkyBox.h"
+
 #include <glm\glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <array>
@@ -29,6 +30,7 @@ static ContainerProg *cp;
 static Lamp *l;
 static BackCamera *bc;
 static Camera *c;
+static SkyBox *sb;
 static int width, height;
 static GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
 static GLfloat lastFrame = 0.0f;  	// Time of last frame
@@ -48,7 +50,8 @@ int main(int argc, char *argv[])
 	createGLFWwindow();
 	c = new Camera();
 	l = new Lamp(view, projection);
-	bc = new BackCamera(view, projection);
+	bc = new BackCamera();
+	sb = new SkyBox(view, projection);
 
 	cp = new ContainerProg(view, projection, l);
 	Shader shader("..\\OpenGLisfun\\loader.vert", "..\\OpenGLisfun\\loader.frag");
@@ -56,14 +59,6 @@ int main(int argc, char *argv[])
 	
 	glEnable(GL_DEPTH_TEST);
 	setup_framebuffer();
-	std::array<const GLchar*, 6> faces;
-	faces[0] = "..\\OpenGLisfun\\skybox\\right.jpg";
-	faces[1] = "..\\OpenGLisfun\\skybox\\left.jpg";
-	faces[2] = "..\\OpenGLisfun\\skybox\\top.jpg";
-	faces[3] = "..\\OpenGLisfun\\skybox\\bottom.jpg";
-	faces[4] = "..\\OpenGLisfun\\skybox\\back.jpg";
-	faces[5] = "..\\OpenGLisfun\\skybox\\front.jpg";
-	GLuint cubemapTexture = loadCubemap(faces);
 
 
 	while (!glfwWindowShouldClose(window)) {
@@ -84,16 +79,23 @@ int main(int argc, char *argv[])
 		glBindFramebuffer(GL_FRAMEBUFFER, bc->FBO);
 		glClearColor(0.0f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDepthMask(GL_FALSE);
+		sb->render();
+		glDepthMask(GL_TRUE);		
 		l->render();
 		glEnable(GL_CULL_FACE);
 		m->Render();
 		glDisable(GL_CULL_FACE);
 		cp->render();
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		// 2. render again into the default frame buffer
 		view = c->GetViewMatrix();
 		glClearColor(0.0f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDepthMask(GL_FALSE);
+		sb->render();
+		glDepthMask(GL_TRUE);
 		l->render();
 		glEnable(GL_CULL_FACE);
 		m->Render();
@@ -264,32 +266,4 @@ bool createGLFWwindow()
 	glfwSetCursorPosCallback(window, mouse_callback);
 
 	return true;
-}
-
-GLuint loadCubemap(std::array<const GLchar*, 6> faces)
-{
-	GLuint textureID;
-	glGenTextures(1, &textureID);
-	glActiveTexture(GL_TEXTURE0);
-
-	int width, height;
-	unsigned char* image;
-
-	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-	for (GLuint i = 0; i < faces.size(); i++)
-	{
-		image = SOIL_load_image(faces[i], &width, &height, 0, SOIL_LOAD_RGB);
-		glTexImage2D(
-			GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0,
-			GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image
-			);
-	}
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-
-	return textureID;
 }

@@ -129,6 +129,7 @@
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ModelWithLight.cpp" />
+    <ClCompile Include="SkyBox.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="backcamera.frag" />
@@ -139,6 +140,8 @@
     <None Include="lamp.frag" />
     <None Include="loader.frag" />
     <None Include="loader.vert" />
+    <None Include="skybox.frag" />
+    <None Include="skybox.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BackCamera.h" />
@@ -149,6 +152,7 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelWithLight.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="SkyBox.h" />
     <ClInclude Include="WorldObject.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

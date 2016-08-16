@@ -2,19 +2,19 @@
 #include "WorldObject.h"
 #include "Shader.h"
 
-class BackCamera :	public WorldObject
+class BackCamera
 {
 public:
 	GLuint FBO;
 	Shader shader = Shader("..\\OpenGLisfun\\backcamera.vert", "..\\OpenGLisfun\\backcamera.frag");
 
-	BackCamera(glm::mat4x4 &view, glm::mat4x4 &projection);
+	BackCamera();
 	virtual ~BackCamera();
 
 	void render();
 private:
 	GLuint VAO, VBO, texture;
-	GLfloat data[5*6]{
+	GLfloat data[5*6] {
 		// vertex				// texcoords
 		-1.0,	-1.0,	0.0,	0.0, 0.0,		// bottom left		// #1
 		1.0,	-1.0,	0.0,	1.0, 0.0,		// bottom right

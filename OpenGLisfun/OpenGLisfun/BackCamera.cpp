@@ -4,7 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-BackCamera::BackCamera(glm::mat4x4 &view, glm::mat4x4 &projection) : WorldObject(glm::mat4(), glm::mat4())
+BackCamera::BackCamera()
 {
 	setup();
 }
@@ -24,8 +24,6 @@ void BackCamera::render()
 			model = glm::translate(model, glm::vec3(0.8, 0.8, 0.0));
 			model = glm::scale(model, glm::vec3(0.2, 0.2, 0.0));
 			glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-			glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-			glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, texture);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
