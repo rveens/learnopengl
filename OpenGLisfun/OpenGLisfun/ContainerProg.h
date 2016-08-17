@@ -3,14 +3,13 @@
 #include "Camera.h"
 #include <glm/glm.hpp>
 #include "Lamp.h"
-#include "WorldObject.h"
 #include "Shader.h"
 
-class ContainerProg : public WorldObject
+class ContainerProg
 {
 public:
 	Shader shader = Shader("..\\OpenGLisfun\\container.vert", "..\\OpenGLisfun\\container.frag");
-	ContainerProg(glm::mat4x4 &view, glm::mat4x4 &projection, Lamp *p);
+	ContainerProg(Lamp *p);
 	virtual ~ContainerProg();
 	void render();
 	void setTexture(GLuint textureHandle);

@@ -3,11 +3,15 @@
 layout (location = 0) in vec3 position;
 out vec3 TexCoords;
 
-uniform mat4 view;
-uniform mat4 projection;
+layout (std140) uniform Matrices 
+{
+	mat4 projection;
+	mat4 view;
+};
 
 void main()
-{
-	gl_Position = projection * view * vec4(position, 1.0);
+{		
+	mat4 newView = mat4(mat3(view));
+	gl_Position = projection * newView * vec4(position, 1.0);
 	TexCoords = position;
 }

@@ -1,9 +1,10 @@
 #include "Lamp.h"
+#include "Constants.h"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <GLFW\glfw3.h>
 
-Lamp::Lamp(glm::mat4x4 &view, glm::mat4x4 &projection) : WorldObject(view, projection)
+Lamp::Lamp()
 {
 	setupVOA();
 }
@@ -22,8 +23,6 @@ void Lamp::render()
 		model = glm::scale(model, glm::vec3(0.2f));
 		lightPos =  model * lightPos;
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 		glBindVertexArray(m_VAO);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -44,4 +43,9 @@ void Lamp::setupVOA()
 	glBindVertexArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	// setup uniform buffer
+	shader.Use();
+	glUniformBlockBinding(shader.Program, glGetUniformBlockIndex(shader.Program, "Matrices"), Constants::UniformMatricesBindingPoint);
+	glUseProgram(0);
 }

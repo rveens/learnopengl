@@ -9,15 +9,19 @@
 
 #include "Mesh.h"
 #include "Shader.h"
-#include "WorldObject.h"
+#include "Constants.h"
 
-class Model : public WorldObject
+class Model
 {
 public:
 	/* Functions */
-	Model(GLchar *path, Shader shader, glm::mat4x4 &view, glm::mat4x4 &projection) : shader(shader), WorldObject(view, projection)
+	Model(GLchar *path, Shader shader) : shader(shader)
 	{
 		this->loadModel(path);
+		// setup uniform buffer
+		shader.Use();
+		glUniformBlockBinding(shader.Program, glGetUniformBlockIndex(shader.Program, "Matrices"), Constants::UniformMatricesBindingPoint);
+		glUseProgram(0);
 	}
 	virtual ~Model();
 	void Render();

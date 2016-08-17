@@ -3,7 +3,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 
-ModelWithLight::ModelWithLight(GLchar *path, Shader shader, glm::mat4x4 &view, glm::mat4x4 &projection, Lamp *l) : l(l), Model(path, shader, view, projection)
+ModelWithLight::ModelWithLight(GLchar *path, Shader shader, Lamp *l) : l(l), Model(path, shader)
 {
 }
 
@@ -14,9 +14,6 @@ ModelWithLight::~ModelWithLight()
 
 void ModelWithLight::setupUniforms()
 {
-	glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-	glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-
 	// Draw the loaded model
 	glm::mat4 model;
 	model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene

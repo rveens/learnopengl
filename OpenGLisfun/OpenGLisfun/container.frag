@@ -62,7 +62,7 @@ void main()
 		1.0,	-8.0,	1.0,
 		1.0,	1.0,	1.0
 	);
-	color = vec4(applyKernel(edgy, material.diffuse, Texcoord), 1.0);
+	//color = vec4(applyKernel(edgy, material.diffuse, Texcoord), 1.0);
 }
 
 vec3 applyKernel(float kernel[9], sampler2D tex, vec2 texcoords)

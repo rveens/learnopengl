@@ -5,7 +5,7 @@
 class ModelWithLight :	public Model
 {
 public:
-	ModelWithLight(GLchar *path, Shader shader, glm::mat4x4 &view, glm::mat4x4 &projection, Lamp *l);
+	ModelWithLight(GLchar *path, Shader shader, Lamp *l);
 	virtual ~ModelWithLight();
 
 	virtual void setupUniforms();

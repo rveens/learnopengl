@@ -3,16 +3,15 @@
 #include "Camera.h"
 #include <glm/glm.hpp>
 
-#include "WorldObject.h"
 #include "Shader.h"
 
-class Lamp : public WorldObject
+class Lamp
 {
 public:
 	Shader shader = Shader("..\\OpenGLisfun\\container.vert", "..\\OpenGLisfun\\lamp.frag");
 	glm::vec4 lightPos = glm::vec4(offset, 1.0);
 
-	Lamp(glm::mat4x4 &view, glm::mat4x4 &projection);
+	Lamp();
 	virtual ~Lamp();
 	void render();
 private:

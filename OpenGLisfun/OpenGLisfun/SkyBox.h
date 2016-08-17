@@ -1,17 +1,16 @@
 #pragma once
 
 #include "Shader.h"
-#include "WorldObject.h"
 
 #include <array>
 #include <glm\glm.hpp>
 
-class SkyBox : public WorldObject
+class SkyBox
 {
 public:
 	Shader shader = Shader("..\\OpenGLisfun\\skybox.vert", "..\\OpenGLisfun\\skybox.frag");
 
-	SkyBox(glm::mat4x4 &view, glm::mat4x4 &projection);
+	SkyBox();
 	virtual ~SkyBox();
 
 	void render();

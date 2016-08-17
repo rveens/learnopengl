@@ -146,6 +146,7 @@
   <ItemGroup>
     <ClInclude Include="BackCamera.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Constants.h" />
     <ClInclude Include="ContainerProg.h" />
     <ClInclude Include="Lamp.h" />
     <ClInclude Include="Mesh.h" />
@@ -153,7 +154,6 @@
     <ClInclude Include="ModelWithLight.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SkyBox.h" />
-    <ClInclude Include="WorldObject.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

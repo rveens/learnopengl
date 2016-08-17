@@ -18,6 +18,7 @@
 #include "BackCamera.h"
 #include "ModelWithLight.h"
 #include "SkyBox.h"
+#include "Constants.h"
 
 #include <glm\glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -25,41 +26,43 @@
 
 // global variables
 static GLFWwindow *window;
-static glm::mat4 projection, view;
+// objects in the world
 static ContainerProg *cp;
 static Lamp *l;
 static BackCamera *bc;
 static Camera *c;
 static SkyBox *sb;
+static Model *m;
+// other stuff
 static int width, height;
 static GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
 static GLfloat lastFrame = 0.0f;  	// Time of last frame
+static bool keys[1024];
 
 // some function headers
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode);
 bool createGLFWwindow();
 void do_movement();
-void setup_framebuffer();
-GLuint loadCubemap(std::array<const GLchar*, 6> faces);
+void render();
+GLuint setup_uniformblockmatrices();
 
-static bool keys[1024];
-static GLuint framebuffer, texturecolorbuffer;
 
 int main(int argc, char *argv[])
 {
 	createGLFWwindow();
+
+	// create objects
 	c = new Camera();
-	l = new Lamp(view, projection);
+	l = new Lamp();
 	bc = new BackCamera();
-	sb = new SkyBox(view, projection);
-
-	cp = new ContainerProg(view, projection, l);
-	Shader shader("..\\OpenGLisfun\\loader.vert", "..\\OpenGLisfun\\loader.frag");
-	Model *m = new ModelWithLight("..\\OpenGLisfun\\nanosuit\\nanosuit.obj", shader, view, projection, l);
+	sb = new SkyBox();
+	cp = new ContainerProg(l);
 	
+	m = new ModelWithLight("..\\OpenGLisfun\\nanosuit\\nanosuit.obj", Shader("..\\OpenGLisfun\\loader.vert", "..\\OpenGLisfun\\loader.frag"), l);
+	
+	// setup
 	glEnable(GL_DEPTH_TEST);
-	setup_framebuffer();
-
+	GLuint matricesUniformBlock = setup_uniformblockmatrices();
 
 	while (!glfwWindowShouldClose(window)) {
 		GLfloat currentFrame = glfwGetTime();
@@ -71,38 +74,29 @@ int main(int argc, char *argv[])
 		do_movement();
 
 		// rendering
-		projection = glm::perspective(c->Zoom, (float)width / height, 0.1f, 100.0f);
+		glm::mat4 projection = glm::perspective(c->Zoom, (float)width / height, 0.1f, 100.0f);
+		glBindBuffer(GL_UNIFORM_BUFFER, matricesUniformBlock);
+		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, bc->FBO);
 		// 1. render into frame buffer object
 		Camera camera2 = *c;
 		camera2.Front *= -1.0f;
-		view = camera2.GetViewMatrix();
-		glBindFramebuffer(GL_FRAMEBUFFER, bc->FBO);
-		glClearColor(0.0f, 0.2f, 0.2f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glDepthMask(GL_FALSE);
-		sb->render();
-		glDepthMask(GL_TRUE);		
-		l->render();
-		glEnable(GL_CULL_FACE);
-		m->Render();
-		glDisable(GL_CULL_FACE);
-		cp->render();
+		glm::mat4 view = camera2.GetViewMatrix();
+		glBindBuffer(GL_UNIFORM_BUFFER, matricesUniformBlock);
+		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		render();
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		// 2. render again into the default frame buffer
 		view = c->GetViewMatrix();
-		glClearColor(0.0f, 0.2f, 0.2f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glDepthMask(GL_FALSE);
-		sb->render();
-		glDepthMask(GL_TRUE);
-		l->render();
-		glEnable(GL_CULL_FACE);
-		m->Render();
-		glDisable(GL_CULL_FACE);
-		cp->render();
+		glBindBuffer(GL_UNIFORM_BUFFER, matricesUniformBlock);
+		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		render();
+		bc->render();	// render back camera
 
-		bc->render();
 		// swap the front and back buffer
 		glfwSwapBuffers(window);
 	}
@@ -111,31 +105,32 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-void setup_framebuffer()
+void render()
 {
-	glGenFramebuffers(1, &framebuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	glClearColor(0.0f, 0.2f, 0.2f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glDepthMask(GL_FALSE);
+	sb->render();
+	glDepthMask(GL_TRUE);
+	l->render();
+	glEnable(GL_CULL_FACE);
+	m->Render();
+	glDisable(GL_CULL_FACE);
+	cp->render();
+}
 
-	glGenTextures(1, &texturecolorbuffer);
-	glBindTexture(GL_TEXTURE_2D, texturecolorbuffer);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
+GLuint setup_uniformblockmatrices()
+{
+	GLuint matrices;
 
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texturecolorbuffer, 0);
+	glGenBuffers(1, &matrices);
+	glBindBuffer(GL_UNIFORM_BUFFER, matrices);
+	glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	
+	glBindBufferRange(GL_UNIFORM_BUFFER, Constants::UniformMatricesBindingPoint, matrices, 0, 2 * sizeof(glm::mat4));
 
-	GLuint rbo;
-	glGenRenderbuffers(1, &rbo);
-	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	return matrices;
 }
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode)
@@ -169,16 +164,6 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 		glUseProgram(cp->shader.Program);
 		glUniform1f(glGetUniformLocation(cp->shader.Program, "mixer"), value);
 		glUseProgram(0);
-	}
-	if (key == GLFW_KEY_P && GLFW_PRESS) {
-		if (toggle2) {
-			glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-		}
-		else {
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			cp->setTexture(texturecolorbuffer);
-		}
-		toggle2 = !toggle2;
 	}
 }
 

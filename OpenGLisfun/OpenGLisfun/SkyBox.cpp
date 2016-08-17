@@ -1,9 +1,10 @@
 #include "SkyBox.h"
+#include "Constants.h"
 
 #include <SOIL.h>
 #include <glm/gtc/type_ptr.hpp>
 
-SkyBox::SkyBox(glm::mat4x4 &view, glm::mat4x4 &projection) : WorldObject(view, projection)
+SkyBox::SkyBox()
 {
 	setup();
 }
@@ -19,10 +20,6 @@ void SkyBox::render()
 	glBindVertexArray(VBO);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-		glm::mat4 newView = glm::mat4(glm::mat3(view));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(newView));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-		glUniform1i(glGetUniformLocation(shader.Program, "skybox"), 0);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 	glUseProgram(0);
@@ -51,6 +48,12 @@ void SkyBox::setup()
 	faces[4] = "..\\OpenGLisfun\\skybox\\back.jpg";
 	faces[5] = "..\\OpenGLisfun\\skybox\\front.jpg";
 	cubemapTexture = loadCubemap(faces);
+
+	// setup uniform buffer
+	shader.Use();
+	glUniformBlockBinding(shader.Program, glGetUniformBlockIndex(shader.Program, "Matrices"), Constants::UniformMatricesBindingPoint);
+	glUniform1i(glGetUniformLocation(shader.Program, "skybox"), 0);
+	glUseProgram(0);
 }
 
 GLuint SkyBox::loadCubemap(std::array<const GLchar*, 6> faces)

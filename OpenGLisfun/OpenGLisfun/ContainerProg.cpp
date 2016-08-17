@@ -1,9 +1,10 @@
 #include "ContainerProg.h"
+#include "Constants.h"
 #include "SOIL.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <GLFW\glfw3.h>
 
-ContainerProg::ContainerProg(glm::mat4x4 &view, glm::mat4x4 &projection, Lamp *p) : p(p), WorldObject(view, projection)
+ContainerProg::ContainerProg(Lamp *p) : p(p)
 {
 	setupShaders();
 	setupVOA();
@@ -19,8 +20,6 @@ void ContainerProg::render()
 		glm::mat4x4 model;
 		model = glm::mat4();
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 		/*glUniform3f(glGetUniformLocation(shader.Program, "material.ambient"), 0.0215f, 0.1745f, 0.0215f);
 		glUniform3f(glGetUniformLocation(shader.Program, "material.diffuse"), 0.07568f, 0.61424f, 0.07568f);
@@ -102,6 +101,9 @@ void ContainerProg::setupShaders()
 		glUniform1i(glGetUniformLocation(shader.Program, "material.emission"), 2);
 		glGenerateMipmap(GL_TEXTURE_2D);
 		SOIL_free_image_data(image);
+
+
+		glUniformBlockBinding(shader.Program, glGetUniformBlockIndex(shader.Program, "Matrices"), Constants::UniformMatricesBindingPoint);
 	glUseProgram(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
