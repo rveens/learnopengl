@@ -62,6 +62,7 @@ int main(int argc, char *argv[])
 	
 	// setup
 	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
 	GLuint matricesUniformBlock = setup_uniformblockmatrices();
 
 	while (!glfwWindowShouldClose(window)) {
@@ -107,8 +108,9 @@ int main(int argc, char *argv[])
 
 void render()
 {
-	glClearColor(0.0f, 0.2f, 0.2f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.2f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	cp->render();
 	glDepthMask(GL_FALSE);
 	sb->render();
 	glDepthMask(GL_TRUE);
@@ -116,7 +118,6 @@ void render()
 	glEnable(GL_CULL_FACE);
 	m->Render();
 	glDisable(GL_CULL_FACE);
-	cp->render();
 }
 
 GLuint setup_uniformblockmatrices()
