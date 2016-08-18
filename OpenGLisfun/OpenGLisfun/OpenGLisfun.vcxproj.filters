@@ -72,6 +72,12 @@
     <None Include="skybox.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="geometrytest.geom">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="geometrytest.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">

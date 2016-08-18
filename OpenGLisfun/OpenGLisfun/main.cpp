@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 	bc = new BackCamera();
 	sb = new SkyBox();
 	cp = new ContainerProg(l);
-	
+
 	m = new ModelWithLight("..\\OpenGLisfun\\nanosuit\\nanosuit.obj", Shader("..\\OpenGLisfun\\loader.vert", "..\\OpenGLisfun\\loader.frag"), l);
 	
 	// setup
@@ -116,8 +116,11 @@ void render()
 	glDepthMask(GL_TRUE);
 	l->render();
 	glEnable(GL_CULL_FACE);
+	m->shader = Shader("..\\OpenGLisfun\\loader.vert", "..\\OpenGLisfun\\loader.frag");
 	m->Render();
 	glDisable(GL_CULL_FACE);
+	m->shader = Shader("..\\OpenGLisfun\\loader.vert", "..\\OpenGLisfun\\geometrytest.frag", "..\\OpenGLisfun\\geometrytest.geom");
+	m->Render();
 }
 
 GLuint setup_uniformblockmatrices()

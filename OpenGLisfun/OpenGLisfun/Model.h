@@ -26,7 +26,7 @@ public:
 	virtual ~Model();
 	void Render();
 	virtual void setupUniforms() = 0;
-protected:
+
 	Shader shader;
 private:
 	/* Model Data */

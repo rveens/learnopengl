@@ -137,6 +137,8 @@
     <None Include="ClassDiagram.cd" />
     <None Include="container.frag" />
     <None Include="container.vert" />
+    <None Include="geometrytest.frag" />
+    <None Include="geometrytest.geom" />
     <None Include="lamp.frag" />
     <None Include="loader.frag" />
     <None Include="loader.vert" />
