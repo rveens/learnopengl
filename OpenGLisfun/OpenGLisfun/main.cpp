@@ -119,8 +119,8 @@ void render()
 	m->shader = Shader("..\\OpenGLisfun\\loader.vert", "..\\OpenGLisfun\\loader.frag");
 	m->Render();
 	glDisable(GL_CULL_FACE);
-	m->shader = Shader("..\\OpenGLisfun\\loader.vert", "..\\OpenGLisfun\\geometrytest.frag", "..\\OpenGLisfun\\geometrytest.geom");
-	m->Render();
+	//m->shader = Shader("..\\OpenGLisfun\\loader.vert", "..\\OpenGLisfun\\geometrytest.frag", "..\\OpenGLisfun\\geometrytest.geom");
+	//m->Render();
 }
 
 GLuint setup_uniformblockmatrices()

@@ -40,7 +40,7 @@ void Mesh::Draw(GLuint program)
         }
         
         // Also set each mesh's shininess property to a default value (if you want you could extend this to another mesh property and possibly change this value)
-        glUniform1f(glGetUniformLocation(program, "material.shininess"), 16.0f);
+        glUniform1f(glGetUniformLocation(program, "material.shininess"), 32.0f);
 
         // Draw mesh
         glBindVertexArray(this->VAO);
