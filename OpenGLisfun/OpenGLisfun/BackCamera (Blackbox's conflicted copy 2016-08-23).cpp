@@ -55,6 +55,10 @@ void BackCamera::setup()
 	GLuint ren;
 	glGenRenderbuffers(1, &ren);
 	glBindRenderbuffer(GL_RENDERBUFFER, ren);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 800, 400);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, ren);
 
 	// texture
 	glGenTextures(1, &texture);

@@ -12,7 +12,6 @@ layout (std140) uniform Matrices
 void main()
 {		
 	mat4 newView = mat4(mat3(view));
-	vec4 pos = projection * newView * vec4(position, 1.0);
-	gl_Position = pos.xyww;
+	gl_Position = projection * newView * vec4(position, 1.0);
 	TexCoords = position;
 }

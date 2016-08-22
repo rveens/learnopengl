@@ -45,7 +45,7 @@ bool createGLFWwindow();
 void do_movement();
 void render();
 GLuint setup_uniformblockmatrices();
-
+void setup_depthmap(GLuint &depthmapFB, GLuint &depthmap);
 
 int main(int argc, char *argv[])
 {
@@ -61,9 +61,13 @@ int main(int argc, char *argv[])
 	m = new ModelWithLight("..\\OpenGLisfun\\nanosuit\\nanosuit.obj", Shader("..\\OpenGLisfun\\loader.vert", "..\\OpenGLisfun\\loader.frag"), l);
 	
 	// setup
+	glfwWindowHint(GLFW_SAMPLES, 4);
+	glEnable(GL_MULTISAMPLE);
+	glEnable(GL_FRAMEBUFFER_SRGB);
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
 	GLuint matricesUniformBlock = setup_uniformblockmatrices();
+	GLuint shadowmapFB, shadowmap;
+	setup_depthmap(shadowmapFB, shadowmap);
 
 	while (!glfwWindowShouldClose(window)) {
 		GLfloat currentFrame = glfwGetTime();
@@ -79,11 +83,24 @@ int main(int argc, char *argv[])
 		glBindBuffer(GL_UNIFORM_BUFFER, matricesUniformBlock);
 		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+
+		// 0. render into shadowmap
+		glBindFramebuffer(GL_FRAMEBUFFER, shadowmapFB);
+		glm::mat4 view = c->GetViewMatrix();
+		glBindBuffer(GL_UNIFORM_BUFFER, matricesUniformBlock);
+		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		render();
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		glBindTexture(GL_TEXTURE_2D, shadowmap);
+
+		// 1. render into frame buffer object for backcamera
 		glBindFramebuffer(GL_FRAMEBUFFER, bc->FBO);
-		// 1. render into frame buffer object
 		Camera camera2 = *c;
 		camera2.Front *= -1.0f;
-		glm::mat4 view = camera2.GetViewMatrix();
+		view = camera2.GetViewMatrix();
 		glBindBuffer(GL_UNIFORM_BUFFER, matricesUniformBlock);
 		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -110,15 +127,18 @@ void render()
 {
 	glClearColor(0.0f, 0.0f, 0.2f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	cp->render();
+
 	glDepthMask(GL_FALSE);
 	sb->render();
 	glDepthMask(GL_TRUE);
+
+	cp->render();
 	l->render();
 	glEnable(GL_CULL_FACE);
 	m->shader = Shader("..\\OpenGLisfun\\loader.vert", "..\\OpenGLisfun\\loader.frag");
 	m->Render();
 	glDisable(GL_CULL_FACE);
+
 	//m->shader = Shader("..\\OpenGLisfun\\loader.vert", "..\\OpenGLisfun\\geometrytest.frag", "..\\OpenGLisfun\\geometrytest.geom");
 	//m->Render();
 }
@@ -135,6 +155,27 @@ GLuint setup_uniformblockmatrices()
 	glBindBufferRange(GL_UNIFORM_BUFFER, Constants::UniformMatricesBindingPoint, matrices, 0, 2 * sizeof(glm::mat4));
 
 	return matrices;
+}
+
+void setup_depthmap(GLuint &depthmapFB, GLuint &depthmap)
+{
+	glGenFramebuffers(1, &depthmapFB);
+
+	const GLuint SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+
+	glGenTextures(1, &depthmap);
+	glBindTexture(GL_TEXTURE_2D, depthmap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, depthmapFB);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthmap, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode)

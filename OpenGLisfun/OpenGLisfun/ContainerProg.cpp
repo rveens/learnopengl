@@ -45,12 +45,15 @@ void ContainerProg::render()
 	
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
+		glUniform1i(glGetUniformLocation(shader.Program, "material.diffuse"), 0);
 
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture2);
+		glUniform1i(glGetUniformLocation(shader.Program, "material.specular"), 1);
 
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, texture3);
+		glUniform1i(glGetUniformLocation(shader.Program, "material.emission"), 2);
 	
 		glBindVertexArray(m_VAO);
 			for (GLuint i = 0; i < 10; i++)
