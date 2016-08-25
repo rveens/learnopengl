@@ -54,9 +54,13 @@ void ContainerProg::render()
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, texture3);
 		glUniform1i(glGetUniformLocation(shader.Program, "material.emission"), 2);
+
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, shadowMap);
+		glUniform1i(glGetUniformLocation(shader.Program, "shadowMap"), 3);
 	
 		glBindVertexArray(m_VAO);
-			for (GLuint i = 0; i < 10; i++)
+			/*for (GLuint i = 0; i < 10; i++)
 			{
 				model = glm::mat4();
 				model = glm::translate(model, cubePositions[i]);
@@ -65,7 +69,22 @@ void ContainerProg::render()
 				glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
 				glDrawArrays(GL_TRIANGLES, 0, 36);
-			}
+			}*/
+		// floor
+		model = glm::mat4();
+		model = glm::translate(model, glm::vec3(0.0, -5.0, 0.0));
+		model = glm::scale(model, glm::vec3(10.0, 5.0, 10.0));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		// light
+		model = glm::mat4();
+		model = glm::translate(model, glm::vec3(-1.0f, 4.0f, -1.0f));
+		model = glm::scale(model, glm::vec3(0.1, 0.1, 0.1));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		
+		
 		glBindVertexArray(0);
 	glUseProgram(0);
 

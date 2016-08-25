@@ -8,6 +8,8 @@
 class ContainerProg
 {
 public:
+	GLuint shadowMap;
+
 	Shader shader = Shader("..\\OpenGLisfun\\container.vert", "..\\OpenGLisfun\\container.frag");
 	ContainerProg(Lamp *p);
 	virtual ~ContainerProg();

@@ -15,7 +15,7 @@ public:
 	virtual ~Lamp();
 	void render();
 private:
-	glm::vec3 offset = glm::vec3(0.5f, 1.0f, 1.0f);
+	glm::vec3 offset = glm::vec3(1.0f, 1.0f, -1.0f);
 
 	float aspectRatio;
 	GLuint m_VAO;

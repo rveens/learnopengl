@@ -4,7 +4,7 @@
 class BackCamera
 {
 public:
-	GLuint FBO;
+	GLuint FBO, texture;
 	Shader shader = Shader("..\\OpenGLisfun\\backcamera.vert", "..\\OpenGLisfun\\backcamera.frag");
 
 	BackCamera();
@@ -12,7 +12,7 @@ public:
 
 	void render();
 private:
-	GLuint VAO, VBO, texture;
+	GLuint VAO, VBO;
 	GLfloat data[5*6] {
 		// vertex				// texcoords
 		-1.0,	-1.0,	0.0,	0.0, 0.0,		// bottom left		// #1

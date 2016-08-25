@@ -33,6 +33,7 @@ void main()
 		1.0,	2.0,	1.0
 	);
 	color = vec4(applyKernel(trippy, tex, Texcoord), 1.0);
+	//color = vec4(vec3(texture(tex, Texcoord).r), 1.0);
 }
 
 vec3 applyKernel(float kernel[9], sampler2D tx, vec2 texcoords)

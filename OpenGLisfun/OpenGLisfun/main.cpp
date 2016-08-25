@@ -38,6 +38,7 @@ static int width, height;
 static GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
 static GLfloat lastFrame = 0.0f;  	// Time of last frame
 static bool keys[1024];
+static const GLuint SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 
 // some function headers
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode);
@@ -68,6 +69,8 @@ int main(int argc, char *argv[])
 	GLuint matricesUniformBlock = setup_uniformblockmatrices();
 	GLuint shadowmapFB, shadowmap;
 	setup_depthmap(shadowmapFB, shadowmap);
+	cp->shadowMap = shadowmap;
+	bc->texture = shadowmap;
 
 	while (!glfwWindowShouldClose(window)) {
 		GLfloat currentFrame = glfwGetTime();
@@ -79,30 +82,36 @@ int main(int argc, char *argv[])
 		do_movement();
 
 		// rendering
-		glm::mat4 projection = glm::perspective(c->Zoom, (float)width / height, 0.1f, 100.0f);
-		glBindBuffer(GL_UNIFORM_BUFFER, matricesUniformBlock);
-		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		glm::mat4 lightView = glm::lookAt(glm::vec3(0.0f, 2.0f, -1.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f));
+		GLfloat near_plane = 1.0f, far_plane = 7.5f;
+		glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
-
-		// 0. render into shadowmap
+		// 0. render into shadowmap, use lightProjection and lightView
 		glBindFramebuffer(GL_FRAMEBUFFER, shadowmapFB);
+		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 		glm::mat4 view = c->GetViewMatrix();
 		glBindBuffer(GL_UNIFORM_BUFFER, matricesUniformBlock);
-		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
+		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(lightProjection));
+		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(lightView));
+		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * 2, sizeof(glm::mat4), glm::value_ptr(glm::mat4(0.0)));
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 		render();
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		glBindTexture(GL_TEXTURE_2D, shadowmap);
-
-		// 1. render into frame buffer object for backcamera
+		// 1. render into frame buffer object for backcamera, use normal view and projection
 		glBindFramebuffer(GL_FRAMEBUFFER, bc->FBO);
+		glViewport(0, 0, width, height);
 		Camera camera2 = *c;
 		camera2.Front *= -1.0f;
 		view = camera2.GetViewMatrix();
+		glm::mat4 projection = glm::perspective(c->Zoom, (float)width / height, 0.1f, 100.0f);
 		glBindBuffer(GL_UNIFORM_BUFFER, matricesUniformBlock);
+		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
 		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
+		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * 2, sizeof(glm::mat4), glm::value_ptr(lightSpaceMatrix));
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 		render();
 
@@ -125,7 +134,7 @@ int main(int argc, char *argv[])
 
 void render()
 {
-	glClearColor(0.0f, 0.0f, 0.2f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glDepthMask(GL_FALSE);
@@ -135,7 +144,7 @@ void render()
 	cp->render();
 	l->render();
 	glEnable(GL_CULL_FACE);
-	m->shader = Shader("..\\OpenGLisfun\\loader.vert", "..\\OpenGLisfun\\loader.frag");
+	//m->shader = Shader("..\\OpenGLisfun\\loader.vert", "..\\OpenGLisfun\\loader.frag");
 	m->Render();
 	glDisable(GL_CULL_FACE);
 
@@ -149,10 +158,10 @@ GLuint setup_uniformblockmatrices()
 
 	glGenBuffers(1, &matrices);
 	glBindBuffer(GL_UNIFORM_BUFFER, matrices);
-	glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
+	glBufferData(GL_UNIFORM_BUFFER, 3 * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	
-	glBindBufferRange(GL_UNIFORM_BUFFER, Constants::UniformMatricesBindingPoint, matrices, 0, 2 * sizeof(glm::mat4));
+	glBindBufferRange(GL_UNIFORM_BUFFER, Constants::UniformMatricesBindingPoint, matrices, 0, 3 * sizeof(glm::mat4));
 
 	return matrices;
 }
@@ -160,8 +169,6 @@ GLuint setup_uniformblockmatrices()
 void setup_depthmap(GLuint &depthmapFB, GLuint &depthmap)
 {
 	glGenFramebuffers(1, &depthmapFB);
-
-	const GLuint SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 
 	glGenTextures(1, &depthmap);
 	glBindTexture(GL_TEXTURE_2D, depthmap);
